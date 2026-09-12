@@ -1,10 +1,4 @@
-import sys
+﻿import uvicorn
 
-pre = "import subprocess\n"
-
-code = sys.stdin.read()
-finalCode = pre + code
-try:
-    exec(finalCode,{})
-except Exception as e:
-    print(f"Error: {e}")
+if __name__ == '__main__':
+    uvicorn.run('src.app:app', host='0.0.0.0', port=8000, reload=True)
