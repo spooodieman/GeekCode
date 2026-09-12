@@ -1,17 +1,13 @@
-import React, { useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import CodeLayout from "./pages/CodeLayout";
-import { fetchData } from "./services/backendApi";
-function App() {
+﻿import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
+function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path = "/" element = {<CodeLayout /> } />
-
+        <Route path="/" element={<div>GeekCode</div>} />
       </Routes>
     </BrowserRouter>
-  );
+  )
 }
 
-export default App;
+export default App

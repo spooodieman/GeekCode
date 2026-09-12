@@ -1,35 +1,11 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-import path from "path";
-import { fileURLToPath } from "url";
+﻿import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path'
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
-  optimizeDeps: {
-    include: [
-      "@monaco-editor/react",
-      "monaco-editor",
-    ],
-  },
+  plugins: [react()],
   resolve: {
-    alias: {
-      "@": path.resolve(path.dirname(fileURLToPath(import.meta.url)), "src"),
-    },
+    alias: { '@': path.resolve(__dirname, './src') },
   },
-  define: {
-    global: "globalThis",
-  },
-  worker: {
-    format: "es",
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          "monaco-editor": ["monaco-editor"],
-        },
-      },
-    },
-  },
-});
+  server: { port: 5173, proxy: { '/api': 'http://localhost:8000' } },
+})
