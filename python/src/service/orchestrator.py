@@ -31,3 +31,21 @@ class Workflow:
     def add_step(self, name: str, handler: str, **params) -> 'Workflow':
         self.steps.append(WorkflowStep(name=name, handler=handler, params=params))
         return self
+
+class OrchestratorEngine:
+    """Drive a Workflow through its steps, managing state transitions."""
+
+    def __init__(self, dispatcher):
+        self.dispatcher = dispatcher
+
+    async def run(self, workflow: Workflow) -> Workflow:
+        for step in workflow.steps:
+            step.status = StepStatus.RUNNING
+            try:
+                step.result = await self.dispatcher.dispatch(step.handler, **step.params)
+                step.status = StepStatus.COMPLETED
+            except Exception as exc:
+                step.status = StepStatus.FAILED
+                step.error = str(exc)
+                break   # halt on first failure
+        return workflow
