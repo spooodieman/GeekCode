@@ -1,40 +1,46 @@
-import React, { useState, useContext, createContext } from "react";
+﻿import { createContext, useContext, useState, type ReactNode } from 'react'
+import axios from 'axios'
 
-type User = {
-  id: number;
-  username: string;
-};
+interface User { username: string; email: string }
+interface AuthCtx {
+  user: User | null
+  token: string | null
+  login: (email: string, password: string) => Promise<void>
+  register: (username: string, email: string, password: string) => Promise<void>
+  logout: () => void
+}
 
-type AuthContextType = {
-  user: User | null;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
-  isLoading: boolean;
-};
+const AuthContext = createContext<AuthCtx | null>(null)
 
-export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined
-);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser]   = useState<User | null>(null)
+  const [token, setToken] = useState<string | null>(localStorage.getItem('gc_token'))
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const [user] = useState<User | null>({
-    id: 1,
-    username: "User",
-  });
-  const [isLoading] = useState<boolean>(false);
+  const login = async (email: string, password: string) => {
+    const { data } = await axios.post('/api/auth/login', { email, password })
+    localStorage.setItem('gc_token', data.token)
+    setToken(data.token)
+    setUser({ username: data.username, email })
+  }
 
-  return (
-    <AuthContext.Provider value={{ user, setUser: () => {}, isLoading }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  const register = async (username: string, email: string, password: string) => {
+    const { data } = await axios.post('/api/auth/register', { username, email, password })
+    localStorage.setItem('gc_token', data.token)
+    setToken(data.token)
+    setUser({ username: data.username, email })
+  }
+
+  const logout = () => {
+    localStorage.removeItem('gc_token')
+    setToken(null)
+    setUser(null)
+  }
+
+  return <AuthContext.Provider value={{ user, token, login, register, logout }}>{children}</AuthContext.Provider>
+}
 
 export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return ctx;
-};
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
+  return ctx
+}
