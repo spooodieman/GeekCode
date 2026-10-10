@@ -29,3 +29,17 @@ def decode_token(token: str) -> dict:
 
 def get_current_user(credentials: HTTPAuthorizationCredentials = Security(security)) -> dict:
     return decode_token(credentials.credentials)
+
+from enum import Enum
+
+class Role(str, Enum):
+    USER  = 'user'
+    ADMIN = 'admin'
+
+def require_role(required: Role):
+    def _checker(credentials: HTTPAuthorizationCredentials = Security(security)) -> dict:
+        payload = decode_token(credentials.credentials)
+        if payload.get('role', Role.USER) != required:
+            raise HTTPException(status_code=403, detail='Insufficient permissions')
+        return payload
+    return _checker
