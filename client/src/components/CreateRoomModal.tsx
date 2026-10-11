@@ -171,3 +171,6 @@ function CreateRoomModal({ isOpen, onClose }: CreateRoomModalProps) {
 }
 
 export default CreateRoomModal;
+
+// CreateRoomModal â€“ smart discovery and local errands workflow
+// Integrated venue search via Geoapify Â· Oct 2026
