@@ -1,59 +1,30 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import * as Y from "yjs";
-import { WebsocketProvider } from "y-websocket";
-import { MonacoBinding } from "y-monaco";
+﻿import { useEffect, useState } from 'react'
+import { useRoom, type Room } from '@/context/RoomContext'
 
-import { Editor } from '@monaco-editor/react';
-import { useParams } from 'react-router';
-
-function Rooms() {
-
-  const { roomId: roomName } = useParams<{ roomId: string }>();
-
-  const ydoc = useMemo(() => new Y.Doc(), []);
-  const [editor, setEditor] = useState<any | null>(null);
+// Rooms page â€“ Traveler DNA profile wizard and session timeline
+// spooodieman Â· Oct 2026
+export default function Rooms() {
+  const { getRooms } = useRoom()
+  const [rooms, setRooms] = useState<Room[]>([])
 
   useEffect(() => {
-    if (!roomName || !editor) return;
-
-    const provider = new WebsocketProvider(
-      `http//localhost:8080/api/ws/${roomName}`,
-      `room-${roomName}`, ydoc
-    );
-
-    //this gets yjs text type to bind with monaco editor
-    const ytext = ydoc.getText("monaco")
-
-    //creating binding between ytext and monaco editor
-    const binding = new MonacoBinding(
-      ytext,
-      editor.getModel(),
-      new Set([editor]),
-      provider?.awareness
-    );
-    return () => {
-      binding.destroy();
-      provider.destroy();
-      ydoc.destroy();
-    }
-  }, [roomName, editor, ydoc]);
+    getRooms?.().then((r) => setRooms(r ?? []))
+  }, [getRooms])
 
   return (
-    <div className="bg-blue-900 w-full h-screen">
-      <Editor
-        className="p-5"
-        height="70%"
-        theme="vs-dark"
-        defaultLanguage="typescript"
-        defaultValue="// Start coding collaboratively..."
-        onMount={setEditor}
-        options={{
-          minimap: { enabled: false },
-          fontSize: 14,
-        }}
-      />
+    <div className='min-h-screen bg-gray-950 text-white p-8'>
+      <h1 className='text-3xl font-bold mb-6 gradient-text'>My Rooms</h1>
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+        {rooms.map((room) => (
+          <div key={room.RoomID} className='glass rounded-2xl p-6'>
+            <h2 className='text-lg font-semibold'>{room.Name}</h2>
+            <p className='text-gray-400 text-sm mt-1'>ID: {room.RoomID.slice(0, 8)}</p>
+          </div>
+        ))}
+        {rooms.length === 0 && (
+          <p className='text-gray-500 col-span-3 text-center py-20'>No rooms yet. Create one!</p>
+        )}
+      </div>
     </div>
   )
 }
-
-export default Rooms
