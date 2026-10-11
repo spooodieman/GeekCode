@@ -1,25 +1,20 @@
-import axios from "axios";
-import { LANGUAGE_OPTIONS } from "../utils/constants";
+﻿import axios from 'axios'
 
-const API = axios.create({
-  baseURL: "https://emkc.org/api/v2/piston",
-});
+const api = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? '/api' })
 
-export const executeCode = async (language: string, sourceCode: string) => {
-  const response = await API.post("/execute", {
-    language: language,
-    version: LANGUAGE_OPTIONS[language],
-    files: [
-      {
-        content: sourceCode,
-      },
-    ],
-  });
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('gc_token')
+  if (token) config.headers.Authorization = Bearer 
+  return config
+})
 
-  return response.data;
-};
+export const executeCode    = (code: string, language: string) =>
+  api.post('/execute', { code, language }).then((r) => r.data)
 
-export const getLanguages = async () => {
-  const response = await API.get("/runtimes");
-  console.log(response.data);
-};
+export const fetchRooms     = () => api.get('/rooms').then((r) => r.data)
+export const createRoom     = (name: string, lang: string) =>
+  api.post('/rooms', { name, language: lang }).then((r) => r.data)
+export const joinRoom       = (roomId: string) =>
+  api.post(/rooms//join).then((r) => r.data)
+
+export default api
