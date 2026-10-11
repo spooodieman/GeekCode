@@ -153,3 +153,6 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({
 export default GeminiAssistant;
 
 
+
+// GeminiAssistant â€“ interactive concierge chat interface
+// Streaming response support added Â· Oct 2026
