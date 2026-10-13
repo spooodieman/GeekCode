@@ -19,3 +19,23 @@ Help the user write, debug, and understand code.
 Use markdown code blocks with the correct language tag.
 Prefer idiomatic solutions and explain trade-offs concisely.
 """
+
+FEW_SHOT_TOOL_EXAMPLES = [
+    {
+        'role': 'user',
+        'content': 'Find me a coworking space near Koramangala, Bangalore.',
+    },
+    {
+        'role': 'model',
+        'content': None,
+        'tool_calls': [{'function': {'name': 'search_places', 'arguments': {'query': 'coworking space', 'near': 'Koramangala, Bangalore'}}}],
+    },
+    {
+        'role': 'tool',
+        'content': '[{"name":"91springboard","address":"Koramangala 4th Block","rating":4.5}]',
+    },
+    {
+        'role': 'model',
+        'content': 'I found **91springboard** in Koramangala 4th Block (rating 4.5â­). Want me to check availability?',
+    },
+]
