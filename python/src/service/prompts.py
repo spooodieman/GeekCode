@@ -39,3 +39,17 @@ FEW_SHOT_TOOL_EXAMPLES = [
         'content': 'I found **91springboard** in Koramangala 4th Block (rating 4.5â­). Want me to check availability?',
     },
 ]
+
+def build_system_prompt(persona: str = 'explorer', language: str = 'en') -> str:
+    """Interpolate context into the concierge system prompt."""
+    base = SYSTEM_PROMPT_CONCIERGE.strip()
+    base += f'\n\nUser persona: {persona.capitalize()}'
+    base += f'\nRespond in: {language.upper()}'
+    return base
+
+
+def inject_context(prompt: str, context: dict) -> str:
+    """Replace {{key}} placeholders with context values."""
+    for key, val in context.items():
+        prompt = prompt.replace('{{' + key + '}}', str(val))
+    return prompt
