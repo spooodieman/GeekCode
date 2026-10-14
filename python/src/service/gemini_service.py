@@ -23,3 +23,16 @@ def get_client() -> genai.GenerativeModel:
         model_name=DEFAULT_MODEL,
         generation_config=GENERATION_CONFIG,
     )
+
+from typing import Generator
+
+def stream_response(model: genai.GenerativeModel, prompt: str) -> Generator[str, None, None]:
+    """Yield text chunks from a streaming Gemini response."""
+    response = model.generate_content(prompt, stream=True)
+    total_tokens = 0
+    for chunk in response:
+        if chunk.text:
+            yield chunk.text
+        if hasattr(chunk, 'usage_metadata') and chunk.usage_metadata:
+            total_tokens = chunk.usage_metadata.total_token_count
+    print(f'[gemini] total tokens used: {total_tokens}')
