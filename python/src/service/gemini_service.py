@@ -36,3 +36,20 @@ def stream_response(model: genai.GenerativeModel, prompt: str) -> Generator[str,
         if hasattr(chunk, 'usage_metadata') and chunk.usage_metadata:
             total_tokens = chunk.usage_metadata.total_token_count
     print(f'[gemini] total tokens used: {total_tokens}')
+
+import time
+
+def generate_with_retry(model: genai.GenerativeModel, prompt: str, max_retries: int = 3) -> str:
+    """Generate content with exponential-backoff retry on transient errors."""
+    delay = 1.0
+    for attempt in range(1, max_retries + 1):
+        try:
+            resp = model.generate_content(prompt)
+            return resp.text
+        except Exception as exc:
+            if attempt == max_retries:
+                raise
+            print(f'[gemini] attempt {attempt} failed: {exc}. Retrying in {delay}s...')
+            time.sleep(delay)
+            delay *= 2
+    return ''
