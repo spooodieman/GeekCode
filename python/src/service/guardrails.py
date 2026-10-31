@@ -23,3 +23,24 @@ def sanitize_input(text: str) -> str:
     # Strip HTML tags as a baseline
     text = re.sub(r'<[^>]+>', '', text)
     return text.strip()
+
+CONFIDENCE_THRESHOLD = 0.6
+HALLUCINATION_PHRASES = [
+    'I cannot verify',
+    'As an AI language model',
+    'I do not have real-time',
+]
+
+def check_output(text: str) -> str:
+    """Flag outputs that may contain hallucinated or unverified claims."""
+    flags = [p for p in HALLUCINATION_PHRASES if p.lower() in text.lower()]
+    if flags:
+        print(f'[guardrails] potential hallucination markers detected: {flags}')
+    return text
+
+
+def verify_tool_output(tool_name: str, output: dict) -> bool:
+    """Verify that tool output matches expected schema before injecting into prompt."""
+    if tool_name == 'search_places':
+        return isinstance(output, list) and all('name' in p for p in output)
+    return True
