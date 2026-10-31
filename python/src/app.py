@@ -49,3 +49,20 @@ def login(body: LoginBody):
         raise HTTPException(status_code=401, detail='Invalid credentials')
     token = create_access_token({'sub': body.email, 'username': user['username']})
     return {'token': token, 'username': user['username']}
+
+from src.service.guardrails import sanitize_input, check_output
+
+class AIPromptBody(BaseModel):
+    prompt: str
+    persona: str = 'explorer'
+    language: str = 'en'
+
+@app.post('/api/ai/chat')
+async def ai_chat(body: AIPromptBody):
+    clean_prompt = sanitize_input(body.prompt)
+    from src.service.gemini_service import get_client, generate_with_retry
+    from src.service.prompts import build_system_prompt
+    model  = get_client()
+    system = build_system_prompt(persona=body.persona, language=body.language)
+    result = generate_with_retry(model, f'{system}\n\nUser: {clean_prompt}')
+    return {'response': check_output(result)}
