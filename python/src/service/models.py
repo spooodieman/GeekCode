@@ -67,3 +67,24 @@ class Conversation(BaseModel):
     messages:   list[Message] = Field(default_factory=list)
     created_at: datetime      = Field(default_factory=_now)
     updated_at: datetime      = Field(default_factory=_now)
+
+
+class AuditLog(BaseModel):
+    id:         str      = Field(default_factory=_uid)
+    user_id:    str
+    action:     str
+    resource:   str
+    meta:       dict     = Field(default_factory=dict)
+    created_at: datetime = Field(default_factory=_now)
+    # TTL: handled at the MongoDB collection level (expireAfterSeconds: 7776000 â†’ 90 days)
+
+
+class AgentSession(BaseModel):
+    id:           str              = Field(default_factory=_uid)
+    user_id:      str
+    conversation_id: str
+    state:        dict             = Field(default_factory=dict)
+    tool_calls:   list[dict]       = Field(default_factory=list)
+    started_at:   datetime         = Field(default_factory=_now)
+    expires_at:   Optional[datetime] = None
+    # TTL index on expires_at configured in db_indexes.py
