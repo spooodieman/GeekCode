@@ -36,3 +36,34 @@ class Payment(BaseModel):
     gateway_ref: Optional[str] = None
     paid_at:     Optional[datetime] = None
     created_at:  datetime = Field(default_factory=_now)
+
+
+class User(BaseModel):
+    id:         str      = Field(default_factory=_uid)
+    username:   str
+    email:      str
+    role:       str      = 'user'
+    created_at: datetime = Field(default_factory=_now)
+
+
+class Task(BaseModel):
+    id:          str            = Field(default_factory=_uid)
+    user_id:     str
+    workflow_id: Optional[str]  = None
+    title:       str
+    status:      str            = 'pending'
+    result:      Optional[str]  = None
+    created_at:  datetime       = Field(default_factory=_now)
+
+
+class Message(BaseModel):
+    role:    str    # user | model | tool
+    content: str
+
+
+class Conversation(BaseModel):
+    id:         str           = Field(default_factory=_uid)
+    user_id:    str
+    messages:   list[Message] = Field(default_factory=list)
+    created_at: datetime      = Field(default_factory=_now)
+    updated_at: datetime      = Field(default_factory=_now)
