@@ -30,3 +30,14 @@ class GeekCodeAgent:
         reply = check_output(raw)
         conversation.messages.append(Message(role='model', content=reply))
         return reply
+
+    def summarize_memory(self, conversation: Conversation, keep_last: int = 6) -> str:
+        """Compress older messages into a summary to stay within token limits."""
+        if len(conversation.messages) <= keep_last:
+            return ''
+        old = conversation.messages[:-keep_last]
+        summary_prompt = (
+            'Summarise the following conversation in 3 bullet points:\n\n'
+            + '\n'.join(f'{m.role}: {m.content}' for m in old)
+        )
+        return generate_with_retry(self.model, summary_prompt)
