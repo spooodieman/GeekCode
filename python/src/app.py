@@ -66,3 +66,25 @@ async def ai_chat(body: AIPromptBody):
     system = build_system_prompt(persona=body.persona, language=body.language)
     result = generate_with_retry(model, f'{system}\n\nUser: {clean_prompt}')
     return {'response': check_output(result)}
+
+from src.service.agent import GeekCodeAgent
+from src.service.models import Conversation
+
+_sessions: dict[str, tuple[GeekCodeAgent, Conversation]] = {}
+
+class AgentChatBody(BaseModel):
+    session_id: str | None = None
+    message: str
+    persona: str = 'explorer'
+    language: str = 'en'
+
+@app.post('/api/agent/chat')
+async def agent_chat(body: AgentChatBody):
+    sid = body.session_id or __import__('uuid').uuid4().hex
+    if sid not in _sessions:
+        agent = GeekCodeAgent(persona=body.persona, language=body.language)
+        conv  = Conversation(user_id='anonymous')
+        _sessions[sid] = (agent, conv)
+    agent, conv = _sessions[sid]
+    reply = agent.run(body.message, conv)
+    return {'session_id': sid, 'response': reply}
